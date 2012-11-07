@@ -45,7 +45,7 @@ public class PrefixTree
     }
     
     /**
-     * Adds a word to the PrefixTree with a corresponding weight value. 
+     * Adds a word to the PrefixTree with corresponding weight and rubric values 
      * Does not allow duplicates or words whose prefix is already in the tree.
      * @param word the word to add
      * @param weight the weight of the word
@@ -54,9 +54,9 @@ public class PrefixTree
      */
     public boolean add(String word, int weight, int rubric)
     {
+        word = word.toLowerCase();
         Node cur = root;
         int next_idx;
-        word = word.toLowerCase();
         
         for (int i = 0; i < word.length(); ++i)
         {
@@ -81,16 +81,16 @@ public class PrefixTree
     }
     
     /**
-     * Find a word in the tree, if it exists, including wildcards
+     * Find a word in the tree iteratively, if it exists, including wildcards
      * E.g. if "critic" is in the tree, "critically" will map to that
      * @param word the word to look for
      * @return the leaf node associated with this word
      */
     public Node find(String word)
     {
+        word = word.toLowerCase();
         Node cur = root;
         Node next;
-        word = word.toLowerCase();
         
         for (int i = 0; i < word.length(); ++i)
         {
@@ -108,22 +108,25 @@ public class PrefixTree
         }
         ++cur.occurrences;                
         return cur;
+    }    
+    
+    /** Sets the number of occurrences of each word to 0 recursively  */
+    public void reset()
+    {
+        resetHelper(root);
     }
     
-    /** recursive helper for reset */
+    /** 
+     * recursive helper for reset 
+     * @param node the Node to try resetting
+     */
     private void resetHelper(Node node)
     {
         if (node != null)
-            if (node.occurrences > 0)
+            if (node.occurrences != 0)
                 node.occurrences = 0;
             else 
                 for (int i = 0; i < 25; ++i)
                     resetHelper(node.children[i]);
-    }
-    
-    /** Sets the number of occurrences of each word to 0 recursively */
-    public void reset()
-    {
-        resetHelper(root);
     }
 }
