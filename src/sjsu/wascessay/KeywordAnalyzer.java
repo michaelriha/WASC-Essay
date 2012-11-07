@@ -15,27 +15,39 @@ import sjsu.wascessay.PrefixTree.Node;
  */
 public class KeywordAnalyzer 
 {
-    private PrefixTree keywords;
+    private ArrayList<String>[][] keywords;
+    private PrefixTree keywordTree;
     private static final int RUBRICS = 5, WEIGHTS = 2;
     private static final int a = 6, b = 1, c = 4;
     /**
-     * Reads keywords.txt in CWD and builds a prefix tree from it. The expected 
+     * Reads keywordTree.txt in CWD and builds a prefix tree from it. The expected 
      * formatting for each line, one entry per line, is: keyword,weight,rubric
      * CSV values with no spacing. E.g. Critical,2,1
      */
     public KeywordAnalyzer() throws FileNotFoundException, IOException
     {
-        keywords = new PrefixTree();
-        BufferedReader br = new BufferedReader(new FileReader("keywords.txt"));
+        keywords = new ArrayList[RUBRICS][WEIGHTS];
+        keywordTree = new PrefixTree();
+        int weight, rubric;
+        String word;
+        BufferedReader br = new BufferedReader(new FileReader("keywordTree.txt"));
         try 
         {
             String[] line = br.readLine().split(",");
-            keywords.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
+            word = line[0];
+            weight = Integer.valueOf(line[1]);
+            rubric = Integer.valueOf(line[2]);
+            keywordTree.add(word, weight, rubric);
+            keywords[rubric-1][weight-1].add(word);
             
             while (line != null)
             {
                 line = br.readLine().split(",");
-                keywords.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
+                word = line[0];
+                weight = Integer.valueOf(line[1]);
+                rubric = Integer.valueOf(line[2]);
+                keywordTree.add(word, weight, rubric);
+                keywords[rubric-1][weight-1].add(word);
             }
         } finally 
         {
@@ -63,7 +75,7 @@ public class KeywordAnalyzer
         // parse the input and collect statistics needed to calculate the scores
         for (String word : words)
         {
-            Node values = keywords.find(word);
+            Node values = keywordTree.find(word);
             if (values != null)
             {
                 weight = values.getWeight();
@@ -81,13 +93,13 @@ public class KeywordAnalyzer
             sum += score;
             
         }
-        scores[RUBRICS - 1] = sum / (RUBRICS - 1);
+        scores[RUBRICS] = sum / RUBRICS ;
         return scores;
     }
     
     /**
      * Calculates an individual rubric score based on the number of weight one
-     * and two words as well as the total number of words in the document 
+     * and two words as well as the total number of words in the document
      * @param weightOneCount the number of weight one words
      * @param weightTwoCount the number of weight two words
      * @param totalWordCount the total word count
