@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.SortedSet;
 import sjsu.wascessay.PrefixTree.Node;
 
 /**
@@ -15,10 +16,11 @@ import sjsu.wascessay.PrefixTree.Node;
  */
 public class KeywordAnalyzer 
 {
-    private ArrayList<String>[][] keywords;
+    private SortedSet<String>[][] keywordsUsed;
     private PrefixTree keywordTree;
     private static final int RUBRICS = 5, WEIGHTS = 2;
     private static final int a = 6, b = 1, c = 4;
+    
     /**
      * Reads keywordTree.txt in CWD and builds a prefix tree from it. The expected 
      * formatting for each line, one entry per line, is: keyword,weight,rubric
@@ -26,28 +28,21 @@ public class KeywordAnalyzer
      */
     public KeywordAnalyzer() throws FileNotFoundException, IOException
     {
-        keywords = new ArrayList[RUBRICS][WEIGHTS];
+        keywordsUsed= new SortedSet[RUBRICS][WEIGHTS];
+        
         keywordTree = new PrefixTree();
-        int weight, rubric;
-        String word;
-        BufferedReader br = new BufferedReader(new FileReader("keywordTree.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("keywords.txt"));
         try 
         {
             String[] line = br.readLine().split(",");
-            word = line[0];
-            weight = Integer.valueOf(line[1]);
-            rubric = Integer.valueOf(line[2]);
-            keywordTree.add(word, weight, rubric);
-            keywords[rubric-1][weight-1].add(word);
+            keywordTree.add(line[0], Integer.valueOf(line[1]), 
+                                                    Integer.valueOf(line[2]));
             
             while (line != null)
             {
                 line = br.readLine().split(",");
-                word = line[0];
-                weight = Integer.valueOf(line[1]);
-                rubric = Integer.valueOf(line[2]);
-                keywordTree.add(word, weight, rubric);
-                keywords[rubric-1][weight-1].add(word);
+                keywordTree.add(line[0], Integer.valueOf(line[1]), 
+                                                    Integer.valueOf(line[2]));
             }
         } finally 
         {
@@ -64,26 +59,30 @@ public class KeywordAnalyzer
      */
     public double[] calculateRubricScores(ArrayList<String> words)
     {
-        int totalWords = 0, weight = 0, rubric = 0;
+        Node values;
+        int totalWords = 0, rubric, weight;
         double[] scores = new double[RUBRICS+1]; 
         
         /* Rubrics 1-5 stored in indices 0-4. The second dimension of the 
-         array contains counts of how many keywords of each weight were found. 
-         Index 0 contains weight 1, index 1 contains  weight 2, etc.*/
+         array contains counts of how many keywordsUsedof each weight were found. 
+         e.g. wordCounts[4][1] is how many words of weight 2 were in rubric 5 */
         int[][] wordCounts = new int[RUBRICS][WEIGHTS];
         
-        // parse the input and collect statistics needed to calculate the scores
+        // parse the input and collect wordcount statistics for calculation
         for (String word : words)
         {
-            Node values = keywordTree.find(word);
+            values = keywordTree.find(word);
             if (values != null)
             {
-                weight = values.getWeight();
                 rubric = values.getRubric();
+                weight = values.getWeight();
                 ++wordCounts[rubric - 1][weight - 1];
+                keywordsUsed[rubric - 1][weight - 1].add(word);
             }
             ++totalWords;
-        } // calculate the scores, average the sum of the scores for the total
+        } 
+        
+        // calculate the scores, average the sum of the scores for the total
         double score, sum = 0.0;
         for (int i = 0; i < RUBRICS; ++i)
         {
@@ -93,7 +92,7 @@ public class KeywordAnalyzer
             sum += score;
             
         }
-        scores[RUBRICS] = sum / RUBRICS ;
+        scores[RUBRICS] = sum / RUBRICS;
         return scores;
     }
     
