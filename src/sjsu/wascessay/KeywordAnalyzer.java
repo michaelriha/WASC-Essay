@@ -34,6 +34,7 @@ public class KeywordAnalyzer
             while (line != null)
             {
                 line = br.readLine().split(",");
+                keywords.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
             }
         } finally 
         {
