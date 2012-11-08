@@ -10,6 +10,14 @@ public class PrefixTree
     private Node root;
     
     /**
+     * Constructs an empty PrefixTree
+     */
+    public PrefixTree()
+    {
+        root = new Node();
+    }
+    
+    /**
      * A node in the tree which has up to 26 children and a weighted value
      * If the weight is 0, then the node is not a leaf on the tree
      * Also stores the associated rubric and how many times a word has been
@@ -22,7 +30,7 @@ public class PrefixTree
         private int occurrences;
         private Node[] children;
 
-        public Node()
+        private Node()
         { 
             rubric = 0;
             weight = 0;
@@ -36,13 +44,6 @@ public class PrefixTree
         public Node[] getChildren() { return children; }
     }
 
-    /**
-     * Constructs an empty PrefixTree
-     */
-    public PrefixTree()
-    {
-        root = new Node();
-    }
     
     /**
      * Adds a word to the PrefixTree with corresponding weight and rubric values 
@@ -60,18 +61,16 @@ public class PrefixTree
         
         for (int i = 0; i < word.length(); ++i)
         {
+            // add the node. if is already there then return false
             next_idx = (int) (word.charAt(i) - 'a');
-            
-            // add node that wasn't there unless this node is already weighted
             if (cur.children[next_idx] == null)
                 if (cur.weight == 0)
                     cur.children[next_idx] = new Node();
-                else return false;
-            
+                else return false;            
             cur = cur.children[next_idx]; // descend the tree
         }
-        
-        if (cur.weight == 0) // reached a leaf so set the weight
+        // reached a leaf so set the weight
+        if (cur.weight == 0) 
         {
             cur.rubric = rubric;
             cur.weight = weight;
@@ -84,7 +83,7 @@ public class PrefixTree
      * Find a word in the tree iteratively, if it exists, including wildcards
      * E.g. if "critic" is in the tree, "critically" will map to that
      * @param word the word to look for
-     * @return the leaf node associated with this word
+     * @return the leaf node associated with this word, null if not found
      */
     public Node find(String word)
     {
@@ -99,22 +98,22 @@ public class PrefixTree
                 ++cur.occurrences;
                 return cur;
             }
-            next = cur.children[(int) word.charAt(i) - 'a'];
             
+            next = cur.children[(int) word.charAt(i) - 'a'];            
             if (next == null) // word not in tree
-                return null;
-            
+                return null;            
             cur = next; // descend the tree
         }
-        ++cur.occurrences;                
-        return cur;
+        if (cur.weight > 0)
+        {
+            ++cur.occurrences;                
+            return cur;
+        }
+        else return null;
     }    
     
     /** Sets the number of occurrences of each word to 0 recursively  */
-    public void reset()
-    {
-        resetHelper(root);
-    }
+    public void reset() { resetHelper(root); }
     
     /** 
      * recursive helper for reset 
