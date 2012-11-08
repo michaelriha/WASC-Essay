@@ -2,23 +2,22 @@ package sjsu.wascessay;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import sjsu.wascessay.PrefixTree.Node;
 
 /**
- *
- * @author Michael
+ * @author Michael Riha
  */
 public class PrefixTreeTest {
     
     public PrefixTreeTest() 
     {
     }
-
     /**
      * Test of addWord and find methods in PrefixTree class
      */
     @Test
-    public void testAddWord() {
-        System.out.println("addWord");
+    public void testAddAndFind() {
+        System.out.println("add & find");
         
         String[] words = new String[]{"This", "Critical", "Task", "Is", "The",
             "Necessary", "Thing", "That", "We",  "Must", "Do", "Zzz", "Zzyzyx"
@@ -28,22 +27,30 @@ public class PrefixTreeTest {
             2, 1, 2, 1, 1
         };
         
+        Integer[] rubrics = new Integer[]{1, 2, 3, 4, 5, 4, 3, 2,
+            1, 4, 2, 4, 3
+        };
+        
+        // insert the words and weights, then make sure they were stored right
         PrefixTree instance = new PrefixTree();
         for (int i = 0; i < words.length; ++i)
         {
-            instance.add(words[i], weights[i], 1);
+            instance.add(words[i], weights[i], rubrics[i]);
         }
-//        TODO: FIX THESE TESTS TO WORK WITH NODE INSTEAD OF INT[]
-//        for (int i = 0; i < words.length; ++i)
-//        {
-//            assertArrayEquals(new Integer[]{weights[i], 1}, instance.find(words[i]));
-//        }
-//        assertArrayEquals(null, instance.find("Tas"));
-//        assertArrayEquals(null, instance.find("Notintree"));
-//        assertArrayEquals(new Integer[]{2,1}, instance.find("Critically"));
-//        
-//        instance.add("Testword", 2, 3);
-//        assertArrayEquals(new Integer[]{2,3}, instance.find("Testword"));
-//        assertArrayEquals(new Integer[]{2,3}, instance.find("Testwordly"));
+        
+        Node values;
+        for (int i = 0; i < words.length; ++i)
+        {
+            System.out.println("Inserting " + words[i]);
+            values = instance.find(words[i]);
+            assertEquals((int)weights[i], values.getWeight());
+        }
+        
+        // make sure Tas does not match for Task, but Tasks does (wildcard)
+        assertEquals(null, instance.find("Tas"));
+        assertEquals(2, instance.find("Tasks").getWeight());
+        // longer wildcard + value which has no matching letters
+        assertEquals(null, instance.find("Znotintree"));
+        assertEquals(2, instance.find("Critically").getWeight());
     }
 }
