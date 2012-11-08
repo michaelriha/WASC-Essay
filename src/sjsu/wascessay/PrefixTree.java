@@ -43,7 +43,6 @@ public class PrefixTree
         public int getOccurrences() { return occurrences; }
         public Node[] getChildren() { return children; }
     }
-
     
     /**
      * Adds a word to the PrefixTree with corresponding weight and rubric values 
@@ -97,8 +96,7 @@ public class PrefixTree
             {
                 ++cur.occurrences;
                 return cur;
-            }
-            
+            }            
             next = cur.children[(int) word.charAt(i) - 'a'];            
             if (next == null) // word not in tree
                 return null;            
@@ -112,7 +110,32 @@ public class PrefixTree
         else return null;
     }    
     
-    /** Sets the number of occurrences of each word to 0 recursively  */
+    /**
+     * Same as find but does not increment the number of occurrences of word
+     * @param word the word to look for
+     * @return the leaf node associated with this word, null if not found
+     */
+    public Node findNoIncrement(String word)
+    {
+        word = word.toLowerCase();
+        Node cur = root;
+        Node next;
+        
+        for (int i = 0; i < word.length(); ++i)
+        {
+            if (cur.weight > 0) // "wildcard" found early
+                return cur;
+            next = cur.children[(int) word.charAt(i) - 'a'];            
+            if (next == null) // word not in tree
+                return null;            
+            cur = next; // descend the tree
+        }
+        if (cur.weight > 0) 
+            return cur;
+        else return null;
+    }    
+    
+    /** Sets the number of occurrences of each word in tree to 0 recursively  */
     public void reset() { resetHelper(root); }
     
     /** 
@@ -121,11 +144,12 @@ public class PrefixTree
      */
     private void resetHelper(Node node)
     {
-        if (node != null)
-            if (node.occurrences != 0)
-                node.occurrences = 0;
-            else 
-                for (int i = 0; i < 25; ++i)
+        if (node.occurrences != 0)
+            node.occurrences = 0;
+        else 
+            for (int i = 0; i < 25; ++i)
+                if (node.children[i] != null)
                     resetHelper(node.children[i]);
+                else break;
     }
 }

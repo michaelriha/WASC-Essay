@@ -32,7 +32,6 @@ public class KeywordAnalyzer
      */
     public KeywordAnalyzer() throws FileNotFoundException, IOException
     {
-        // initialize fields
         keywordsUsed = new SortedSet[RUBRICS][WEIGHTS];
         wordCounts = new int[RUBRICS][WEIGHTS];
         scores = new double[RUBRICS+1];
@@ -46,17 +45,14 @@ public class KeywordAnalyzer
             String[] line = br.readLine().split(",");
             keywordTree.add(line[0], Integer.valueOf(line[1]), 
                                                     Integer.valueOf(line[2]));
-            
             while (line != null)
             {
                 line = br.readLine().split(",");
                 keywordTree.add(line[0], Integer.valueOf(line[1]), 
                                                     Integer.valueOf(line[2]));
             }
-        } finally
-        {
-            br.close();
-        }
+        } 
+        finally { br.close(); }
     }
     
     /**
@@ -91,8 +87,7 @@ public class KeywordAnalyzer
                 keywordsUsed[rubric - 1][weight - 1].add(word);
             }
             ++totalWords;
-        } 
-        
+        }         
         // calculate the scores, average the sum of the scores for the total
         double score, sum = 0.0;
         for (int i = 0; i < RUBRICS; ++i)
@@ -100,8 +95,7 @@ public class KeywordAnalyzer
             score = calculateScore(wordCounts[i][0], wordCounts[i][1], 
                                                                     totalWords);
             scores[i] = score;
-            sum += score;
-            
+            sum += score;            
         }
         scores[RUBRICS] = sum / RUBRICS;
         return scores;
@@ -124,8 +118,8 @@ public class KeywordAnalyzer
     public double calculateScore(int weightOneCount, int weightTwoCount,
                                         int totalWordCount)
     {
-        if (totalWordCount == 0) return 0.0;
-        
+        if (totalWordCount <= 0) 
+            return 0.0;
         int N = weightOneCount + weightTwoCount;
         double dr = N / totalWordCount;
         double d1; //, d2;
@@ -138,8 +132,7 @@ public class KeywordAnalyzer
         {
             d1 = weightOneCount / N;
             //d2 = weightTwoCount / N;
-        }
-        
+        }        
         return Math.min(1, (N / a) * Math.pow(1 + d1, b) * Math.pow(1 + dr, c));
     }
     
@@ -150,7 +143,7 @@ public class KeywordAnalyzer
     */
     public int getKeywordOccurrences(String keyword)
     {
-        return keywordTree.find(keyword).getOccurrences();
+        return keywordTree.findNoIncrement(keyword).getOccurrences();
     }
     
     /**
