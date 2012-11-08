@@ -13,7 +13,7 @@ public class PrefixTreeTest {
     {
     }
     /**
-     * Test of addWord and find methods in PrefixTree class
+     * Test of addWord and findNoIncrement methods in PrefixTree class
      */
     @Test
     public void testAddAndFind() {
@@ -42,15 +42,17 @@ public class PrefixTreeTest {
         for (int i = 0; i < words.length; ++i)
         {
             System.out.println("Inserting " + words[i]);
-            values = instance.find(words[i]);
+            values = instance.findNoIncrement(words[i]);
             assertEquals((int)weights[i], values.getWeight());
         }
         
         // make sure Tas does not match for Task, but Tasks does (wildcard)
-        assertEquals(null, instance.find("Tas"));
-        assertEquals(2, instance.find("Tasks").getWeight());
+        assertEquals(null, instance.findNoIncrement("Tas"));
+        assertEquals(2, instance.findNoIncrement("Tasks").getWeight());
         // longer wildcard + value which has no matching letters
-        assertEquals(null, instance.find("Znotintree"));
-        assertEquals(2, instance.find("Critically").getWeight());
+        assertEquals(null, instance.findNoIncrement("Znotintree"));
+        assertEquals(2, instance.findNoIncrement("Critically").getWeight());
+        // test getOccurrences
+        assertEquals(1, instance.find("This").getOccurrences());
     }
 }
