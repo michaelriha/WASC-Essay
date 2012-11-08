@@ -18,18 +18,27 @@ public class KeywordAnalyzer
 {
     private SortedSet<String>[][] keywordsUsed;
     private PrefixTree keywordTree;
+    private int[][] wordCounts;
+    private double[] scores;
+    private int totalWords;
+    
     private static final int RUBRICS = 5, WEIGHTS = 2;
     private static final int a = 6, b = 1, c = 4;
     
     /**
-     * Reads keywordTree.txt in CWD and builds a prefix tree from it. The expected 
+     * Reads keywords.txt in CWD and builds a prefix tree from it. The expected 
      * formatting for each line, one entry per line, is: keyword,weight,rubric
      * CSV values with no spacing. E.g. Critical,2,1
      */
     public KeywordAnalyzer() throws FileNotFoundException, IOException
     {
-        keywordsUsed= new SortedSet[RUBRICS][WEIGHTS];
+        // initialize fields
+        keywordsUsed = new SortedSet[RUBRICS][WEIGHTS];
+        wordCounts = new int[RUBRICS][WEIGHTS];
+        scores = new double[RUBRICS+1];
+        totalWords = 0;
         
+        // build prefix tree from keywords.txt
         keywordTree = new PrefixTree();
         BufferedReader br = new BufferedReader(new FileReader("keywords.txt"));
         try 
@@ -44,29 +53,31 @@ public class KeywordAnalyzer
                 keywordTree.add(line[0], Integer.valueOf(line[1]), 
                                                     Integer.valueOf(line[2]));
             }
-        } finally 
+        } finally
         {
             br.close();
         }
     }
     
     /**
-     * Calculates all rubric scores for an arbitrary amount of ASCII text
+     * This function parses an arbitrary amount of text stored as 
+     * ArrayList<String>. As it checks for each word in the tree, it stores the
+     * number of times each keyword has appeared and how many total words there
+     * are for later use. These word occurrence counts are cleared every time 
+     * this function is called.Then, based on keyword statistics collected it 
+     * assigns a score for each rubric. 
+     * 
      * @param words the text to analyze
      * @return an array of scores between 0.0 and ?.0. Index 5 contains the
      * total score, and 0-4 contain those pertaining to the 5 proficiencies
      * in the order given
      */
-    public double[] calculateRubricScores(ArrayList<String> words)
+    public double[] calculateScores(ArrayList<String> words)
     {
+        // initialize and clear any leftover occurrence fields
         Node values;
-        int totalWords = 0, rubric, weight;
-        double[] scores = new double[RUBRICS+1]; 
-        
-        /* Rubrics 1-5 stored in indices 0-4. The second dimension of the 
-         array contains counts of how many keywordsUsedof each weight were found. 
-         e.g. wordCounts[4][1] is how many words of weight 2 were in rubric 5 */
-        int[][] wordCounts = new int[RUBRICS][WEIGHTS];
+        int rubric, weight;
+        keywordTree.reset();
         
         // parse the input and collect wordcount statistics for calculation
         for (String word : words)
@@ -86,7 +97,7 @@ public class KeywordAnalyzer
         double score, sum = 0.0;
         for (int i = 0; i < RUBRICS; ++i)
         {
-            score = calculateRubricScore(wordCounts[i][0], wordCounts[i][1], 
+            score = calculateScore(wordCounts[i][0], wordCounts[i][1], 
                                                                     totalWords);
             scores[i] = score;
             sum += score;
@@ -99,6 +110,7 @@ public class KeywordAnalyzer
     /**
      * Calculates an individual rubric score based on the number of weight one
      * and two words as well as the total number of words in the document
+     * 
      * @param weightOneCount the number of weight one words
      * @param weightTwoCount the number of weight two words
      * @param totalWordCount the total word count
@@ -109,16 +121,45 @@ public class KeywordAnalyzer
      * d2: Density of weight two words (weightTwoCount / N)
      * dr: Density of related words (N / totalWordCount)
      */
-    public double calculateRubricScore(int weightOneCount, int weightTwoCount,
+    public double calculateScore(int weightOneCount, int weightTwoCount,
                                         int totalWordCount)
     {
         if (totalWordCount == 0) return 0.0;
         
         int N = weightOneCount + weightTwoCount;
-        double d1 = weightOneCount / N;
-        //double d2 = weightTwoCount / N;
         double dr = N / totalWordCount;
+        double d1; //, d2;
+        if (N == 0)
+        {
+            d1 = 0;
+            //d2 = 0;
+        }
+        else
+        {
+            d1 = weightOneCount / N;
+            //d2 = weightTwoCount / N;
+        }
         
         return Math.min(1, (N / a) * Math.pow(1 + d1, b) * Math.pow(1 + dr, c));
+    }
+    
+   /**
+    * Gets how many times the keyword was found in the text
+    * @param keyword the word to look for
+    * @return the number of times the keyword was found
+    */
+    public int getKeywordOccurrences(String keyword)
+    {
+        return keywordTree.find(keyword).getOccurrences();
+    }
+    
+    /**
+     * Returns the keywords used for each rubric and weight
+     * @return 2 dimensional array of SortedStrings containing the keywords for
+     * keywordsUsed[rubric][weight]
+     */
+    public SortedSet<String>[][] getKeywordsUsed()
+    {
+        return keywordsUsed;
     }
 }
