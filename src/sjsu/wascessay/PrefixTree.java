@@ -9,19 +9,13 @@ public class PrefixTree
 {
     private Node root;
     
-    /**
-     * Constructs an empty PrefixTree
-     */
-    public PrefixTree()
-    {
-        root = new Node();
-    }
+    /** Constructs an empty PrefixTree */
+    public PrefixTree() { root = new Node(); }
     
     /**
      * A node in the tree which has up to 26 children and a weighted value
      * If the weight is 0, then the node is not a leaf on the tree
-     * Also stores the associated rubric and how many times a word has been
-     * found
+     * Also stores the associated rubric and how many times a word has been used
      */
     public class Node
     {
@@ -60,7 +54,7 @@ public class PrefixTree
         
         for (int i = 0; i < word.length(); ++i)
         {
-            // add the node. if is already there then return false
+            // add the node. if is already weighted then return false
             next_idx = (int) (word.charAt(i) - 'a');
             if (cur.children[next_idx] == null)
                 if (cur.weight == 0)
@@ -133,15 +127,11 @@ public class PrefixTree
         if (cur.weight > 0) 
             return cur;
         else return null;
-    }    
+    }
     
     /** Sets the number of occurrences of each word in tree to 0 recursively  */
     public void reset() { resetHelper(root); }
     
-    /** 
-     * recursive helper for reset 
-     * @param node the Node to try resetting
-     */
     private void resetHelper(Node node)
     {
         if (node.occurrences != 0)
