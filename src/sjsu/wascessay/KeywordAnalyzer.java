@@ -33,7 +33,7 @@ public class KeywordAnalyzer
         wordCounts = new int[RUBRICS][WEIGHTS];
         
         for (int i = 0; i < RUBRICS; ++i)
-            for (int j = 0; i < WEIGHTS; ++i)
+            for (int j = 0; j < WEIGHTS; ++j)
             {
                 keywordsUsed[i][j] = new TreeSet();
                 wordCounts[i][j] = 0;
@@ -46,7 +46,7 @@ public class KeywordAnalyzer
     
     /** Resets word statistics and keyword occurrences in the tree */
     public void reset()
-    {
+    { 
         for (int i = 0; i < RUBRICS; ++i)
             for (int j = 0; i < WEIGHTS; ++i)
             {
@@ -73,12 +73,15 @@ public class KeywordAnalyzer
         BufferedReader br = new BufferedReader(new FileReader(filename));
         try 
         {
-            String[] line = br.readLine().split(",");
-            keywordTree.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
-            while (line != null)
+            String line = br.readLine();
+            String[] parts = line.split(",");
+            keywordTree.add(parts[0], Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
+            while (true) // while (line != null) causes NullPointerException
             {
-                line = br.readLine().split(",");
-                keywordTree.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
+                line = br.readLine();
+                if (line == null) break;
+                parts = line.split(",");
+                keywordTree.add(parts[0], Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
             }
         } 
         finally { br.close(); }
@@ -140,10 +143,10 @@ public class KeywordAnalyzer
                                         int totalWordCount)
     {
         if (totalWordCount <= 0) return 0.0;
-        int N = weightOneCount + weightTwoCount;
+        double N = (double) weightOneCount + weightTwoCount;
         double dr = N / totalWordCount;
         double d1 = (N == 0) ? 0 : weightOneCount / N;
-        return Math.min(4, 4*((N/a) * Math.pow(1+d1, b) * Math.pow(1+dr, c)));
+        return Math.min(4, (N/a) * Math.pow(1+d1, b) * Math.pow(1+dr, c));
     }
     
    /**@param keyword the word to look for
@@ -160,4 +163,10 @@ public class KeywordAnalyzer
     
     /**@return Scores 0-4 in this format [rub1, rub2, rub3, rub4, rub5, total] */
     public double[] getScores() { return scores; };
+    
+    /**@return the wordcounts for each [rubric][weight] */
+    public int[][] getWordCounts() { return wordCounts; }
+    
+    /**@return the total number of words parsed since reset */
+    public int getTotalWords() { return totalWords; }
 }
