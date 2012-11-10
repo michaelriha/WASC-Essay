@@ -9,14 +9,14 @@ import java.util.ArrayList;
  * @author Akshat Kukreti
  */
 public class PdfExtract {
-    private static ArrayList<String> convertToText(String filename) throws DocumentException, IOException
+    private static final int START_SIZE = 2000;
+    public static ArrayList<String> convertToText(String filename) throws DocumentException, IOException
     {
         boolean brackopen = false;
         boolean brackclose = false;
         
         //Stores the words extracted from the pdf
-        ArrayList<String> words;
-        words = new ArrayList<>();
+        ArrayList<String> words = new ArrayList<>(START_SIZE);
         
         //Accumuates a word
         StringBuilder word = new StringBuilder();
