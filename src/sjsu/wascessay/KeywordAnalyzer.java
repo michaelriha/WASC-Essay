@@ -6,12 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import sjsu.wascessay.PrefixTree.Node;
 
 /**
- * A KeywordAnalyzer that is capable of performing keyword searches on an
- * ArrayList<String> based on various criteria and assigning rubric scores to 
- * each string of text
+ * A KeywordAnalyzer that is capable of performing keyword statistical analysis
+ * on text. Calling parseText multiple times without a reset will continuously 
+ * build word counts. Also, multiple keyword files can be read into the tree.
  * @author Michael Riha
  */
 public class KeywordAnalyzer 
@@ -30,20 +31,36 @@ public class KeywordAnalyzer
     {
         keywordsUsed = new SortedSet[RUBRICS][WEIGHTS];
         wordCounts = new int[RUBRICS][WEIGHTS];
+        
+        for (int i = 0; i < RUBRICS; ++i)
+            for (int j = 0; i < WEIGHTS; ++i)
+            {
+                keywordsUsed[i][j] = new TreeSet();
+                wordCounts[i][j] = 0;
+            }
+        
         scores = new double[RUBRICS+1];
         keywordTree = new PrefixTree();
         totalWords = 0;
     }
     
-    /** Resets instance fields and keyword occurrences in the tree */
-    public void resetFields()
-    {        
-        keywordsUsed = new SortedSet[RUBRICS][WEIGHTS];
-        wordCounts = new int[RUBRICS][WEIGHTS];
+    /** Resets word statistics and keyword occurrences in the tree */
+    public void reset()
+    {
+        for (int i = 0; i < RUBRICS; ++i)
+            for (int j = 0; i < WEIGHTS; ++i)
+            {
+                keywordsUsed[i][j].clear();
+                wordCounts[i][j] = 0;
+            }
+        
         scores = new double[RUBRICS+1];
         keywordTree.reset();
         totalWords = 0;
     }
+    
+    /** Creates a new, empty keyword tree */
+    public void purgeKeywords() { keywordTree = new PrefixTree(); }
     
     /** 
      * Adds the keywords from the specified file to the keyword tree
@@ -57,13 +74,11 @@ public class KeywordAnalyzer
         try 
         {
             String[] line = br.readLine().split(",");
-            keywordTree.add(line[0], Integer.valueOf(line[1]), 
-                                                    Integer.valueOf(line[2]));
+            keywordTree.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
             while (line != null)
             {
                 line = br.readLine().split(",");
-                keywordTree.add(line[0], Integer.valueOf(line[1]), 
-                                                    Integer.valueOf(line[2]));
+                keywordTree.add(line[0], Integer.valueOf(line[1]), Integer.valueOf(line[2]));
             }
         } 
         finally { br.close(); }
@@ -76,9 +91,7 @@ public class KeywordAnalyzer
     public void parseText(ArrayList<String> words)
     {
         Node values;
-        int rubric, weight;
-        keywordTree.reset();
-        
+        int rubric, weight;        
         for (String word : words)
         {
             values = keywordTree.find(word);
@@ -103,8 +116,7 @@ public class KeywordAnalyzer
         double score, sum = 0.0;
         for (int i = 0; i < RUBRICS; ++i)
         {
-            score = calculateScore(wordCounts[i][0], wordCounts[i][1], 
-                                                                    totalWords);
+            score = calculateScore(wordCounts[i][0], wordCounts[i][1], totalWords);
             scores[i] = score;
             sum += score;
         }
@@ -142,10 +154,10 @@ public class KeywordAnalyzer
         return keywordTree.findNoIncrement(keyword).getOccurrences();
     }
     
-    /**@return 2 dimensional array of SortedStrings containing the keywords for
-     * keywordsUsed[rubric][weight] */
+    /**@return 2 dimensional array of sorted sets containing the keywords for
+       keywordsUsed[rubric][weight] */
     public SortedSet<String>[][] getKeywordsUsed() { return keywordsUsed; }
     
-    /**@return Scores in this format [rub1, rub2, rub3, rub4, rub5, total] */
+    /**@return Scores 0-4 in this format [rub1, rub2, rub3, rub4, rub5, total] */
     public double[] getScores() { return scores; };
 }
