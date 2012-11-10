@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author Akshat Kukreti
  */
 public class PdfExtract {
-    private static ArrayList<String> convertToText(String filename) throws DocumentException, IOException
+    public static ArrayList<String> convertToText(String filename) throws DocumentException, IOException
     {
         boolean brackopen = false;
         boolean brackclose = false;
