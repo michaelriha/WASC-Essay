@@ -1,7 +1,7 @@
 package sjsu.wascessay;
 /**
- * A PrefixTree to store keywords. Keywords have their corresponding weights
- * stored in the leaves of the tree.
+ * A PrefixTree to store keywords. Keywords have their corresponding weights,
+ * rubric, and how many times they have been found stored in the leaf nodes
  * 
  * @author Michael Riha
  */

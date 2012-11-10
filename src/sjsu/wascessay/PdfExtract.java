@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package sjsu.wascessay;
 
 import com.itextpdf.text.DocumentException;
@@ -10,13 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- *
- * @author Akshat
+ * @author Akshat Kukreti
  */
 public class PdfExtract {
-    private static String filename;
-    
-    ArrayList<String> converToText(String filename) throws DocumentException, IOException
+    private static ArrayList<String> convertToText(String filename) throws DocumentException, IOException
     {
         boolean brackopen = false;
         boolean brackclose = false;
