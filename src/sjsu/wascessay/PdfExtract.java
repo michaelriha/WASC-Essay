@@ -4,6 +4,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author Akshat Kukreti
@@ -61,6 +62,9 @@ public class PdfExtract {
                             char lowerc = Character.toLowerCase(c);
                             word.append(lowerc);
                         }
+                        else if(c == '-'){
+                            word.append(c);
+                        }
                         if(c == ' '){
                             String wordstring = word.toString();
                             if (!wordstring.isEmpty()){
@@ -79,7 +83,27 @@ public class PdfExtract {
         catch(IOException e){
             System.out.println(e.toString());
         }
-        return words;        
+        
+        //Correcting split up words and adding them
+        ArrayList<String> unsplitwords; 
+        unsplitwords= new ArrayList<>(START_SIZE);
+        Iterator wordit = words.iterator();
+            while(wordit.hasNext()){
+                String word1 = wordit.next().toString();
+                if(word1.charAt(word1.length() -1) == '-' && 
+                        word1.length() > 1){
+                    String word2 = wordit.next().toString();
+                    word1 = word1.replace('-',' ');
+                    String concatword = word1.concat(word2);
+                    concatword = concatword.replaceAll(" ","");
+                    unsplitwords.add(concatword);
+                }
+                else if(!word1.equals("-")) {
+                    unsplitwords.add(word1);
+                }
+            }
+        
+        return unsplitwords;        
     }
 }
 
