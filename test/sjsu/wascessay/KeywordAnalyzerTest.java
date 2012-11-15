@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package sjsu.wascessay;
 
 import com.itextpdf.text.DocumentException;
@@ -26,7 +22,8 @@ public class KeywordAnalyzerTest
         assertEquals(0, instance.getKeywordOccurrences("critical"));
         
         // Get a test pdf and parse the text
-        ArrayList<String> text = PdfExtract.convertToText("D:/test.pdf");
+        String filename = "D:/test.pdf";
+        ArrayList<String> text = PdfExtract.convertToText(filename);
         instance.parseText(text);
         
         // Print a detailed report about the file
@@ -44,13 +41,15 @@ public class KeywordAnalyzerTest
                     totTwo += wordCounts[i][j];
                 total += wordCounts[i][j];
             }
-        sb.append("Keywords from keywords.txt used in test.pdf: ").append(total);
+        sb.append("Keywords in ").append(filename).append(": ").append(total);
         sb.append("\nTotal Weight 1 Keywords: ").append(totOne).append("\n");
         sb.append("Total Weight 2 Keywords: ").append(totTwo);
-        sb.append("\nTotal words:").append(instance.getTotalWords());
+        sb.append("\nTotal words: ").append(instance.getTotalWords());
+        double[] scores = instance.calculateScores();
         for (int i = 0; i < 5; ++i)
         {
-            sb.append("\n\nRubric ");
+            sb.append("\n\nRubric ").append(i+1).append(" Score: ");
+            sb.append(String.format("%.2f", scores[i]));
             for (int j = 0; j < 2; ++j)
             {
                 sb.append("\n  Weight ").append(j+1).append(" keywords used: ").append(wordCounts[i][j]).append("\n      ");
@@ -58,16 +57,10 @@ public class KeywordAnalyzerTest
                 {
                     swap = instance.getKeywordOccurrences(word);
                     total += swap;
-                    sb.append(word).append(" ").append(swap).append(" ");
-                    
+                    sb.append(word).append(" ").append(swap).append(" ");                    
                 }
             }
         }
-        
-        sb.append("\n\nScores: ");
-        double[] scores = instance.calculateScores();
-        for (int i = 0; i < 6; ++i)
-            sb.append(String.format("%.2f", scores[i])).append(" ");
         System.out.println(sb.toString());
     }
 }
