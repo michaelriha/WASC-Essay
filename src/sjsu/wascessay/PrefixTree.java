@@ -54,12 +54,14 @@ public class PrefixTree
         
         for (int i = 0; i < word.length(); ++i)
         {
+            if (word.charAt(i) == '-') 
+                ++i;
             // add the node. if is already weighted then return false
             next_idx = (int) (word.charAt(i) - 'a');
             if (cur.children[next_idx] == null)
                 if (cur.weight == 0)
                     cur.children[next_idx] = new Node();
-                else return false;            
+                else return false;
             cur = cur.children[next_idx]; // descend the tree
         }
         // reached a leaf so set the weight
@@ -90,7 +92,9 @@ public class PrefixTree
             {
                 ++cur.occurrences;
                 return cur;
-            }            
+            }
+            if (word.charAt(i) == '-') // skip hyphens
+                ++i;
             next = cur.children[(int) word.charAt(i) - 'a'];            
             if (next == null) // word not in tree
                 return null;            
@@ -119,6 +123,8 @@ public class PrefixTree
         {
             if (cur.weight > 0) // "wildcard" found early
                 return cur;
+            if (word.charAt(i) == '-') 
+                ++i;
             next = cur.children[(int) word.charAt(i) - 'a'];            
             if (next == null) // word not in tree
                 return null;            
