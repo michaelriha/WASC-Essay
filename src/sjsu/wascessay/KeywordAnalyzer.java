@@ -24,7 +24,7 @@ public class KeywordAnalyzer
     private int totalWords;
     
     private static final int RUBRICS = 5, WEIGHTS = 2;
-    private static final int a = 6, b = 1, c = 4;
+    private static final double a = 0.25, b = 1 - a, c = 2;
     
     /** Constructs a KeywordAnalyzer with no statistical data */
     public KeywordAnalyzer()
@@ -35,7 +35,7 @@ public class KeywordAnalyzer
         for (int i = 0; i < RUBRICS; ++i)
             for (int j = 0; j < WEIGHTS; ++j)
             {
-                keywordsUsed[i][j] = new TreeSet();
+                keywordsUsed[i][j] = new TreeSet<>();
                 wordCounts[i][j] = 0;
             }
         
@@ -97,13 +97,16 @@ public class KeywordAnalyzer
         int rubric, weight;        
         for (String word : words)
         {
-            values = keywordTree.find(word);
-            if (values != null)
+            if (word.length() != 1)
             {
-                rubric = values.getRubric();
-                weight = values.getWeight();
-                ++wordCounts[rubric - 1][weight - 1];
-                keywordsUsed[rubric - 1][weight - 1].add(word);
+                values = keywordTree.find(word);
+                if (values != null)
+                {
+                    rubric = values.getRubric();
+                    weight = values.getWeight();
+                    ++wordCounts[rubric - 1][weight - 1];
+                    keywordsUsed[rubric - 1][weight - 1].add(word);
+                }
             }
             ++totalWords;
         }
@@ -134,9 +137,10 @@ public class KeywordAnalyzer
      * @param weightTwoCount the number of weight two words
      * @param totalWordCount the total word count
      * @return a rubric score between 0.0 and 4.0 based on the formula
-     * score = (N/a)*((1+d1)^b)*((1+dr)^c)
+     * score = 4*(d1+a*d2+b*d1*d2)*((1+dr)^c)
      * N: Total number of keywords
      * d1: Density of weight one words (weightOneCount / N)
+     * d2: Density of weight two words (weightTwoCount / N)
      * dr: Density of related words (N / totalWordCount)
      */
     public static double calculateScore(int weightOneCount, int weightTwoCount,
@@ -146,15 +150,18 @@ public class KeywordAnalyzer
         double N = (double) weightOneCount + weightTwoCount;
         double dr = N / totalWordCount;
         double d1 = (N == 0) ? 0 : weightOneCount / N;
-        return Math.min(4, (N/a) * Math.pow(1+d1, b) * Math.pow(1+dr, c));
+        double d2 = (N == 0) ? 0 : weightTwoCount / N;
+        double score = 4 * (d1 + a*d2 + b*d1*d2) * Math.pow(1+dr, c);
+        return Math.min(4, score);
     }
     
    /**@param keyword the word to look for
-    * @return the number of times the keyword was found
+    * @return the number of times the keyword was found. -1 if not a keyword
     */
     public int getKeywordOccurrences(String keyword)
     {
-        return keywordTree.findNoIncrement(keyword).getOccurrences();
+        Node n = keywordTree.findNoIncrement(keyword); 
+        return (n == null) ? -1 : n.getOccurrences();
     }
     
     /**@return 2 dimensional array of sorted sets containing the keywords for
