@@ -74,7 +74,10 @@ public class PdfExtract {
                             word.append(lowerc);
                         }
                         else if(c == '-'){
-                            word.append(c);
+                            if(word.length() > 0 &&
+                                !(word.charAt(word.length()-1) == '-')){    
+                                word.append(c);
+                            }
                         }
                         if(c == ' '){
                             String wordstring = word.toString();
