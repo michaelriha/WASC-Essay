@@ -106,8 +106,7 @@ public class PdfExtract {
         Iterator worditerator = words.iterator();
         while(worditerator.hasNext()){
             String str = worditerator.next().toString();
-            if(str.indexOf('-') == 0 || str.indexOf(' ') == 0 || 
-                    str.contains("--")){
+            if(str.indexOf('-') == 0 || str.indexOf(' ') == 0){
             }
             else{
                 cleanwords.add(str);
