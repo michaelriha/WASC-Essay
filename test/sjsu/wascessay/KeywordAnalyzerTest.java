@@ -19,11 +19,11 @@ public class KeywordAnalyzerTest
     {
         // Test readKeywordFile
         KeywordAnalyzer instance = new KeywordAnalyzer();
-        instance.readKeywordFile("D:/keywords.txt");
+        instance.readKeywordFile("C:/keyword_test1.txt");
         assertEquals(0, instance.getKeywordOccurrences("critical"));
         
         // Get a test pdf and parse the text
-        String filename = "D:/test3.pdf";
+        String filename = "C:/ss.pdf";
         ArrayList<String> text = PdfExtract.convertToText(filename);
         instance.parseText(text);
         
@@ -61,6 +61,11 @@ public class KeywordAnalyzerTest
             sb.append(String.format("%.2f", scores[i]));
             for (int j = 0; j < 2; ++j)
             {
+                if (sets[i][j].size() == 0)
+                {
+                    line.append("");
+                    break;
+                }
                 lastWildcard = sets[i][j].first();
                 iter = sets[i][j].iterator();
                 line = new StringBuilder();

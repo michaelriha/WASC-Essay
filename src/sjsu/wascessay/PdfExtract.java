@@ -103,13 +103,13 @@ public class PdfExtract {
         Iterator worditerator = words.iterator();
         while(worditerator.hasNext()){
             String str = worditerator.next().toString();
-            if(str.indexOf('-') == 0 || str.indexOf(' ') == 0){
+            if(str.indexOf('-') == 0 || str.indexOf(' ') == 0 || 
+                    str.contains("--")){
             }
             else{
                 cleanwords.add(str);
             }
         }
-        
         return cleanwords;      
     }
 }
